@@ -53,18 +53,18 @@ fn main() {
                 if frac > 1 && (num == 1 || num == top - 1) { continue }
                 if frac > 1 { println!("  {} = 1¢", show_coin(frac + 1, frac)); }
                 let sp = Spec { top, frac, num };
-                let (bests, need) = find_bests(&sp, enumerate(&sp));
+                let Bests { bests, score: need, ties }
+                    = find_bests(&sp, enumerate(&sp), show);
                 if frac == 1 { first = need }
-                for (i, b) in bests.iter().enumerate() {
-                    if show > 0 && i >= show {
-                        println!("    … and {} more", bests.len() - show);
-                        break
-                    }
+                for b in bests.iter() {
                     println!("   {:} => need {}{}",
                         show_coins(sp.frac, b),
                         need,
                         if frac > 1 && need <= first { " *" } else { "" }
                         );
+                }
+                if ties > show {
+                    println!("    … and {} more", ties - show);
                 }
             }
         }

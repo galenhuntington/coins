@@ -93,18 +93,26 @@ pub fn score(Spec { top, frac, .. }: &Spec, nd: &CoinSet) -> usize {
     (1 .. *top).map(|i| nd[i*frac]).sum()
 }
 
+pub struct Bests {
+    pub bests: Vec<CoinSet>,
+    pub score: usize,
+    pub ties: usize,
+}
+
 // Returns collection of best possible coinsets.
-pub fn find_bests(spec: &Spec, it: impl Iterator<Item=CoinSet>)
-        -> (Vec<CoinSet>, usize) {
-    let mut best = BIG_NUM;
+pub fn find_bests(spec: &Spec, it: impl Iterator<Item=CoinSet>, max: usize)
+        -> Bests {
     let mut bests = Vec::new();
+    let mut best = BIG_NUM;
+    let mut ties =  0;
     for cs in it {
         let sc = score(spec, &mk_needs(spec, &cs));
         if sc > best { continue }
-        if sc < best { bests.clear(); best = sc; }
-        bests.push(cs);
+        if sc < best { bests.clear(); best = sc; ties = 0; }
+        if max == 0 || ties < max { bests.push(cs) }
+        ties += 1;
     }
-    (bests, best)
+    Bests { bests, score: best, ties }
 }
 
 pub fn show_coin(frac: usize, c: usize) -> String {
