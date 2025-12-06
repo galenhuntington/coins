@@ -1,5 +1,7 @@
+use crate::scoring::*;
+
 // A big number to function as a penalty for the impossible.
-const BIG_NUM: usize = 0xffff;
+const BIG_NUM: usize = 0xfffffff;
 
 type CoinSet = Vec<usize>;
 
@@ -89,8 +91,9 @@ pub fn mk_needs(Spec { top, frac, .. }: &Spec, coins: &CoinSet) -> Vec<usize> {
 }
 
 // Score is number of coins to get all integer totals.
-pub fn score(Spec { top, frac, .. }: &Spec, nd: &CoinSet) -> usize {
-    (1 .. *top).map(|i| nd[i*frac]).sum()
+pub fn score<E: Scoring>(
+        scoring: &E, Spec { top, frac, .. }: &Spec, nd: &CoinSet) -> usize {
+    (1 .. *top).map(|i| nd[i*frac]).fold(MIN_SCORE, |a, b| scoring.fold_fn(a, b))
 }
 
 pub struct Bests {
@@ -100,13 +103,14 @@ pub struct Bests {
 }
 
 // Returns collection of best possible coinsets.
-pub fn find_bests(spec: &Spec, it: impl Iterator<Item=CoinSet>, max: usize)
+pub fn find_bests<E: Scoring>(
+        scoring: &E, spec: &Spec, it: impl Iterator<Item=CoinSet>, max: usize)
         -> Bests {
     let mut bests = Vec::new();
     let mut best = BIG_NUM;
     let mut ties =  0;
     for cs in it {
-        let sc = score(spec, &mk_needs(spec, &cs));
+        let sc = score(scoring, spec, &mk_needs(spec, &cs));
         if sc > best { continue }
         if sc < best { bests.clear(); best = sc; ties = 0; }
         if max == 0 || ties < max { bests.push(cs) }
