@@ -167,10 +167,11 @@ mod tests {
     fn test_enumerate_count() {
         for top in 0 ..= 50 {
             for num in 0 .. 7 {
-                // println!("{} {}", top, num);
                 assert_eq!(
                     enumerate(&Spec { top, num, frac: 1 }).count(),
-                    if top <= 1 { 0 } else { choose(top-2, num-1) }
+                    if top <= 1 || num == 0 { 0 }
+                        else { choose(top - 2, num - 1) },
+                    "C({}, {})", top, num
                 );
             }
         }
