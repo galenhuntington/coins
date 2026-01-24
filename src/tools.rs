@@ -1,4 +1,5 @@
 use crate::scoring::*;
+use std::cmp::Ordering;
 
 // A big number to function as a penalty for the impossible.
 const BIG_NUM: usize = 0xfffffff;
@@ -12,8 +13,7 @@ pub struct Spec {
     pub num: usize,
 }
 
-pub fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
+pub fn gcd(mut a: usize, mut b: usize) -> usize {
     // tested somewhat faster than recursion
     while b != 0 { (a, b) = (b, a % b) }
     a
@@ -111,8 +111,11 @@ pub fn find_bests<E: Scoring>(
     let mut ties =  0;
     for cs in it {
         let sc = score(scoring, spec, &mk_needs(spec, &cs));
-        if sc > best { continue }
-        if sc < best { bests.clear(); best = sc; ties = 0; }
+        match sc.cmp(&best) {
+            Ordering::Greater => continue,
+            Ordering::Less    => { bests.clear(); best = sc; ties = 0; },
+            _ => {},
+        }
         if max == 0 || ties < max { bests.push(cs) }
         ties += 1;
     }
@@ -120,15 +123,11 @@ pub fn find_bests<E: Scoring>(
 }
 
 pub fn show_coin(frac: usize, c: usize) -> String {
-    let mut s = String::new();
-    if c >= frac || c == 0 {
-        s.push_str(&format!("{}¢", c/frac));
+    match (c / frac, c % frac) {
+        (q, 0) => format!("{q}¢"),
+        (0, r) => format!("{r}ᵼ"),
+        (q, r) => format!("{q}¢{r}ᵼ"),
     }
-    let r = c % frac;
-    if r > 0 {
-        s.push_str(&format!("{}ᵼ", r));
-    }
-    s
 }
 
 pub fn show_coins(frac: usize, cs: &[usize]) -> String {

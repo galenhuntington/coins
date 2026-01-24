@@ -17,7 +17,7 @@ impl Scoring for Sum {
 }
 
 impl Scoring for Max {
-    #[inline] fn fold_fn(&self, a: Score, b: usize) -> Score { usize::max(a, b) }
+    #[inline] fn fold_fn(&self, a: Score, b: usize) -> Score { a.max(b) }
 }
 
 impl Scoring for Quad {
