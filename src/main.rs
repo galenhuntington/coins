@@ -1,10 +1,9 @@
 pub mod scoring;
 pub mod tools;
 
-use clap::*;
+use clap::Parser;
 use std::ops::RangeInclusive;
 use std::num::ParseIntError;
-use std::str::FromStr;
 
 use tools::*;
 use scoring::*;
@@ -12,17 +11,22 @@ use scoring::*;
 type Range = RangeInclusive<usize>;
 
 fn parse_range(s: &str) -> Result<Range, ParseIntError> {
-    match s.find("-") {
-        Some(i) =>
-            match (usize::from_str(&s[..i]), usize::from_str(&s[i+1 ..])) {
-                (Ok(m), Ok(n))            => Ok(m ..= n),
-                (Err(e), _) | (_, Err(e)) => Err(e),
-            },
-        None =>
-            match usize::from_str(s) {
-                Ok(n)  => Ok(n ..= n),
-                Err(e) => Err(e),
-            },
+    match s.split_once('-') {
+        Some((s1, s2)) => Ok(s1.parse()? ..= s2.parse()?),
+        None           => { let n = s.parse()?; Ok( n ..= n) },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_parse_range() {
+        assert_eq!(parse_range("4").unwrap(), 4..=4);
+        assert_eq!(parse_range("1-9").unwrap(), 1..=9);
+        assert!(parse_range("abc").is_err());
+        assert!(parse_range("1-").is_err());
+        assert!(parse_range("-1").is_err());
     }
 }
 

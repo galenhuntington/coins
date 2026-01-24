@@ -122,11 +122,11 @@ pub fn find_bests<E: Scoring>(
 pub fn show_coin(frac: usize, c: usize) -> String {
     let mut s = String::new();
     if c >= frac || c == 0 {
-        s.push_str(format!("{}¢", c/frac).as_str());
+        s.push_str(&format!("{}¢", c/frac));
     }
     let r = c % frac;
     if r > 0 {
-        s.push_str(format!("{}ᵼ", r).as_str());
+        s.push_str(&format!("{}ᵼ", r));
     }
     s
 }
