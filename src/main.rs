@@ -88,7 +88,7 @@ fn main() {
                         if frac > 1 && score <= first { " *" } else { "" }
                     );
                 }
-                if ties > show {
+                if show != 0 && ties > show {
                     println!("    … and {} more", ties - show);
                 }
             }
